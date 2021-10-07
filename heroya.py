@@ -84,12 +84,12 @@ global off_load
 global run_time
 
 # Numpy Seed for consistency of results and runtime of experiment
-np.random.seed(16)
-run_time = 4
+np.random.seed(2)
+run_time = 5
 
 
 # Global Variables Initialization
-trucks = 4
+trucks = 5
 graph = ox.load_graphml("data\\heroya_project_big.graphml.xml")
 export_modes = ["TRAIN","PORT"]
 gates = proj_points(pd.read_csv("data\\gates.csv").values)
@@ -98,7 +98,7 @@ truck_destinations = proj_points(pd.read_csv("data\\truck_destinations.csv").val
 enter_nodes = [x for x in distance.nearest_nodes(graph, gates.x,gates.y)]
 origin_nodes = [x for x in distance.nearest_nodes(graph, truck_origins.x,truck_origins.y)]
 dest_nodes = [x for x in distance.nearest_nodes(graph, truck_destinations.x,truck_destinations.y)]
-off_load = 100 # Seconds of time to offload
+off_load = 500 # Seconds of time to offload
 
 # Starting depot position
 cav_orig_depot = proj_points(pd.read_csv("data\\depot.csv").values)
@@ -374,6 +374,9 @@ max_route_len = max([len(x) for x in route_coorindates])
 
 # Prepare the layout
 fig, ax = ox.plot_graph(graph, node_size=0, edge_linewidth=0.5, show=False, close=False,bgcolor='#f7f5fa') # network
+ax.scatter(graph.nodes[dest_nodes[0]]['x'],graph.nodes[dest_nodes[0]]['y'], marker = "x",label = "Train Station",s=10**2)
+ax.scatter(graph.nodes[dest_nodes[1]]['x'],graph.nodes[dest_nodes[1]]['y'], marker = "x",label = "Port",s=10**2)
+
 scatter_list = []
 
 # Plot the first scatter plot
@@ -389,7 +392,8 @@ for j in range(n_routes):
                                    route_coorindates[j][0][1], 
                                    label=f'CAV ', 
                                    alpha=.75,
-                                   s=8**2))
+                                   marker = "*",
+                                   s=10**2))
 
     
 plt.legend(frameon=False)
@@ -410,9 +414,9 @@ def animate(i):
             y_j = route_coorindates[j][i][1]
             scatter_list[j].set_offsets(np.c_[x_j, y_j])
         except:
-            continue
+            scatter_list[j].set_offsets(np.c_[0, 0])
 
 # Make the animation
-anim = animation.FuncAnimation(fig, animate, frames=max_route_len)
+anim = animation.FuncAnimation(fig, animate,frames=max_route_len)
 writergif = animation.PillowWriter(fps=5)
 anim.save(f'trucks_trajectory_{trucks}.gif',writer=writergif)
